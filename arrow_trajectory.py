@@ -91,6 +91,14 @@ def plot_trajectory(aim_x, aim_y):
     """
     绘制箭的轨迹和瞄准线
     """
+    # 设置中文字体支持 - 使用通用方法
+    import matplotlib
+    matplotlib.rc('font', family='sans-serif')
+    # 使用系统默认sans-serif字体，并替换中文编码
+    from matplotlib.font_manager import FontProperties
+    import io
+    import numpy as np
+    
     # 从配置中获取参数
     xk = ARROW_CONFIG['xk']
     yk = ARROW_CONFIG['yk']
@@ -124,15 +132,6 @@ def plot_trajectory(aim_x, aim_y):
     X_traj = X_0 + v0 * math.cos(theta) * t
     Y_traj = Y_0 + v0 * math.sin(theta) * t - 0.5 * g * t**2
 
-    # 计算瞄准线在H系中的点
-    if abs(X_m - X_k) < 1e-10:  # 垂直线
-        X_aim = np.ones(100) * X_k
-        Y_aim = np.linspace(min(Y_k, Y_m) - 1, max(Y_k, Y_m) + 1, 100)
-    else:
-        X_aim = np.linspace(min(X_k, X_m) - 1, max(X_k, X_m) + 5, 100)
-        m = (Y_m - Y_k) / (X_m - X_k)
-        Y_aim = Y_k + m * (X_aim - X_k)
-
     # 计算所有可能的交点
     # 特殊情况: 垂直线
     if abs(X_m - X_k) < 1e-10:
@@ -164,26 +163,29 @@ def plot_trajectory(aim_x, aim_y):
                 plt.plot(X_i, Y_i, 'rx', markersize=10,
                          label=f'交点{i+1} (t={t_val:.2f}s)')
 
-    # 绘图（在H系中）
+    # 创建新图形
     plt.figure(figsize=(10, 6))
-    plt.plot(X_traj, Y_traj, 'r-', label='箭的轨迹')
-    plt.plot(X_aim, Y_aim, 'b--', label='瞄准线')
-    plt.plot(X_k, Y_k, 'go', label='窥孔位置')
-    plt.plot(X_m, Y_m, 'mo', label='瞄镜位置')
-    plt.plot(X_0, Y_0, 'ko', label='箭头初始位置')
-
-    # 计算所有交点距离
-    distances = calculate_intersection_distance(aim_x, aim_y, return_all=True)
+    
+    # 绘制轨迹等...
+    plt.plot(X_traj, Y_traj, 'r-', label='Arrow Trajectory')
+    # 移除Aim Line的绘制
+    # plt.plot(X_aim, Y_aim, 'b--', label='Aim Line')
+    plt.plot(X_k, Y_k, 'go', label='Peep Sight')
+    plt.plot(X_m, Y_m, 'mo', label='Sight Pin')
+    plt.plot(X_0, Y_0, 'ko', label='Arrow Initial Position')
+    
+    # 使用简单的英文字符替代中文，避免中文显示问题
     if distances:
-        plt.title(
-            f'箭的轨迹与瞄准线 (俯仰角: {math.degrees(theta):.1f}度, 交点距离: {", ".join([f"{d:.2f}米" for d in distances])})')
+        plt.title(f'Arrow Trajectory (Angle: {math.degrees(theta):.1f}°, Distance: {", ".join([f"{d:.2f}m" for d in distances])})')
     else:
-        plt.title(f'箭的轨迹与瞄准线 (俯仰角: {math.degrees(theta):.1f}度, 无交点)')
+        plt.title(f'Arrow Trajectory (Angle: {math.degrees(theta):.1f}°, No Intersection)')
 
     plt.grid(True)
-    plt.xlabel('真实水平距离 (米)')
-    plt.ylabel('真实垂直高度 (米)')
-    plt.legend()
+    plt.xlabel('Horizontal Distance (m)')
+    plt.ylabel('Vertical Height (m)')
+    
+    # 使用英文图例替代中文，从列表中移除'Aim Line'
+    plt.legend(['Arrow Trajectory', 'Peep Sight', 'Sight Pin', 'Arrow Initial Position'])
     plt.axis('equal')
     plt.show()
 

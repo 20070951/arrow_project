@@ -82,11 +82,10 @@ def plot_trajectory(aim_x, aim_y, config):
     """
     绘制箭的轨迹和瞄准线，返回图像对象
     """
-    # 设置中文字体支持
-    plt.rcParams['font.sans-serif'] = ['SimHei',
-                                       'Microsoft YaHei', 'Arial Unicode MS']  # 优先使用的中文字体
-    plt.rcParams['axes.unicode_minus'] = False  # 解决负号显示问题
-
+    # 设置字体支持 - 使用通用英文字体
+    import matplotlib
+    matplotlib.rc('font', family='sans-serif')
+    
     # 从配置中获取参数
     xk = config['xk']
     yk = config['yk']
@@ -152,12 +151,11 @@ def plot_trajectory(aim_x, aim_y, config):
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # 绘制轨迹
-    ax.plot(X_traj, Y_traj, 'r-', label='箭的轨迹')
-    ax.plot(X_aim, Y_aim, 'b--', label='瞄准线')
-    ax.plot(X_ray, Y_ray, 'g:', linewidth=1.5, label='瞄准射线延伸')
-    ax.plot(X_k, Y_k, 'go', label='窥孔位置')
-    ax.plot(X_m, Y_m, 'mo', label='瞄镜位置')
-    ax.plot(X_0, Y_0, 'ko', label='箭头初始位置')
+    ax.plot(X_traj, Y_traj, 'r-', label='Arrow Trajectory')
+    ax.plot(X_ray, Y_ray, 'g:', linewidth=1.5, label='Aim Ray Extension')
+    ax.plot(X_k, Y_k, 'go', label='Peep Sight')
+    ax.plot(X_m, Y_m, 'mo', label='Sight Pin')
+    ax.plot(X_0, Y_0, 'ko', label='Arrow Initial Position')
 
     # 计算交点并绘制
     intersections = calculate_intersection_points(aim_x, aim_y, config)
@@ -167,16 +165,16 @@ def plot_trajectory(aim_x, aim_y, config):
         X_i = X_0 + v0 * math.cos(theta) * t_val
         Y_i = Y_0 + v0 * math.sin(theta) * t_val - 0.5 * g * t_val**2
         ax.plot(X_i, Y_i, 'rx', markersize=10,
-                label=f'交点{i+1} (t={t_val:.2f}s)')
+                label=f'Intersection{i+1} (t={t_val:.2f}s)')
 
     # 设置图表属性
     aim_angle = calculate_aim_angle(aim_x, aim_y, config)  # S系中的瞄准角度
     if intersections:
         ax.set_title(
-            f'箭的轨迹与瞄准线 (俯仰角: {math.degrees(theta):.1f}度, H系瞄准角度: {aim_angle_h:.2f}度)')
+            f'Arrow Trajectory (Angle: {math.degrees(theta):.1f}°, H-sys Aim Angle: {aim_angle_h:.2f}°)')
     else:
         ax.set_title(
-            f'箭的轨迹与瞄准线 (俯仰角: {math.degrees(theta):.1f}度, H系瞄准角度: {aim_angle_h:.2f}度, 无交点)')
+            f'Arrow Trajectory (Angle: {math.degrees(theta):.1f}°, H-sys Aim Angle: {aim_angle_h:.2f}°, No Intersection)')
 
     # 计算轨迹的最高点
     max_height = max(Y_traj)
@@ -201,8 +199,8 @@ def plot_trajectory(aim_x, aim_y, config):
         ax.set_xlim(-5, max_x)
 
     ax.grid(True)
-    ax.set_xlabel('真实水平距离 (米)')
-    ax.set_ylabel('真实垂直高度 (米)')
+    ax.set_xlabel('Horizontal Distance (m)')
+    ax.set_ylabel('Vertical Height (m)')
     ax.legend()
 
     # 返回图像对象
